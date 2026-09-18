@@ -186,12 +186,7 @@ watch(
       </EmptyState>
 
       <div v-else class="heritage-list__grid">
-        <HeritageCard
-          v-for="(item, index) in list"
-          :key="item.id"
-          v-reveal="index * 60"
-          :heritage="item"
-        />
+        <HeritageCard v-for="item in list" :key="item.id" :heritage="item" />
       </div>
 
       <div

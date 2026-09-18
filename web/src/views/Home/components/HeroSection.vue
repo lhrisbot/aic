@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import HeroVisual from './HeroVisual.vue'
 import PatternBackdrop from '@/components/PatternBackdrop.vue'
@@ -7,109 +6,50 @@ import PatternBackdrop from '@/components/PatternBackdrop.vue'
 const router = useRouter()
 
 /** Hero 下方的三个事实性数字，全部与当前实现一致（不夸大） */
-const FACTS: Array<{ to: number; unit: string; label: string }> = [
-  { to: 12, unit: '项', label: '非遗资料示例' },
-  { to: 4, unit: '类', label: '创作场景' },
-  { to: 4, unit: '步', label: '视频生成流程' },
+const FACTS: Array<{ value: string; label: string }> = [
+  { value: '12 项', label: '非遗资料示例' },
+  { value: '4 类', label: '创作场景' },
+  { value: '4 步', label: '视频生成流程' },
 ]
-
-/** 数字滚动：进入视口后用 rAF 递增，给首屏一点"活着"的感觉 */
-const shown = ref<number[]>(FACTS.map(() => 0))
-const factsRef = ref<HTMLElement | null>(null)
-let frame = 0
-
-function runCountUp(): void {
-  const start = performance.now()
-  const duration = 900
-  const tick = (now: number): void => {
-    const progress = Math.min(1, (now - start) / duration)
-    // easeOutCubic，收尾更自然
-    const eased = 1 - (1 - progress) ** 3
-    shown.value = FACTS.map((fact) => Math.round(fact.to * eased))
-    if (progress < 1) {
-      frame = requestAnimationFrame(tick)
-    }
-  }
-  frame = requestAnimationFrame(tick)
-}
-
-let observer: IntersectionObserver | null = null
-
-onMounted(() => {
-  const reduced =
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  if (reduced || typeof IntersectionObserver === 'undefined' || !factsRef.value) {
-    shown.value = FACTS.map((fact) => fact.to)
-    return
-  }
-
-  observer = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        runCountUp()
-        observer?.disconnect()
-        observer = null
-      }
-    },
-    { threshold: 0.4 },
-  )
-  observer.observe(factsRef.value)
-})
-
-onBeforeUnmount(() => {
-  cancelAnimationFrame(frame)
-  observer?.disconnect()
-  observer = null
-})
 </script>
 
 <template>
   <section class="hero">
     <PatternBackdrop class="hero__texture" variant="cloud" />
 
-    <!-- 背景装饰光斑（缓慢呼吸，纯 CSS） -->
-    <span class="hero__orb is-primary" aria-hidden="true" />
-    <span class="hero__orb is-ai" aria-hidden="true" />
-
     <div class="hero__inner u-container">
       <div class="hero__content">
-        <p v-reveal class="hero__eyebrow">
+        <p class="hero__eyebrow">
           <span class="hero__eyebrow-dot" aria-hidden="true" />
           可信非遗知识库 · AI 多模态创作
         </p>
 
-        <h1 v-reveal="80" class="hero__title">
+        <h1 class="hero__title">
           让<span class="hero__highlight">千年非遗</span>，<br />被今天的人看见
         </h1>
 
-        <p v-reveal="160" class="hero__subtitle">
-          基于可信非遗知识库的 AI 多模态文化内容创作平台
-        </p>
+        <p class="hero__subtitle">基于可信非遗知识库的 AI 多模态文化内容创作平台</p>
 
-        <p v-reveal="220" class="hero__desc">
+        <p class="hero__desc">
           帮助文旅工作者快速完成非遗资料查询、场景化内容创作、视频脚本与宣传视频生成。
         </p>
 
-        <div v-reveal="280" class="hero__actions">
+        <div class="hero__actions">
           <el-button type="primary" size="large" @click="router.push('/creation')">
             开始创作
           </el-button>
           <el-button size="large" @click="router.push('/heritage')">探索非遗</el-button>
         </div>
 
-        <dl ref="factsRef" v-reveal="340" class="hero__facts">
-          <div v-for="(fact, index) in FACTS" :key="fact.label" class="hero__fact">
-            <dt class="hero__fact-value">
-              {{ shown[index] }}<span class="hero__fact-unit">{{ fact.unit }}</span>
-            </dt>
+        <dl class="hero__facts">
+          <div v-for="fact in FACTS" :key="fact.label" class="hero__fact">
+            <dt class="hero__fact-value">{{ fact.value }}</dt>
             <dd class="hero__fact-label">{{ fact.label }}</dd>
           </div>
         </dl>
       </div>
 
-      <div v-reveal="200" class="hero__visual">
+      <div class="hero__visual">
         <HeroVisual />
       </div>
     </div>
@@ -236,13 +176,6 @@ onBeforeUnmount(() => {
     font-family: var(--font-serif);
     font-size: var(--fs-2xl);
     color: var(--color-primary);
-    font-variant-numeric: tabular-nums;
-  }
-
-  &__fact-unit {
-    margin-left: 2px;
-    font-size: var(--fs-base);
-    color: var(--text-secondary);
   }
 
   &__fact-label {
@@ -250,32 +183,6 @@ onBeforeUnmount(() => {
     margin-left: 0;
     font-size: var(--fs-xs);
     color: var(--text-tertiary);
-  }
-
-  /* 背景装饰光斑：缓慢呼吸，给首屏增加层次 */
-  &__orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(64px);
-    pointer-events: none;
-    animation: pulse-soft 9s ease-in-out infinite;
-
-    &.is-primary {
-      width: 320px;
-      height: 320px;
-      left: -80px;
-      top: 40px;
-      background: var(--color-primary-soft-strong);
-    }
-
-    &.is-ai {
-      width: 380px;
-      height: 380px;
-      right: -120px;
-      bottom: -80px;
-      background: var(--color-ai-soft);
-      animation-delay: 2.4s;
-    }
   }
 
   &__visual {

@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import HeroSection from './components/HeroSection.vue'
-import HeritageMarquee from './components/HeritageMarquee.vue'
 import SceneAbilitySection from './components/SceneAbilitySection.vue'
 import WorkflowSection from './components/WorkflowSection.vue'
 import TechFeatureSection from './components/TechFeatureSection.vue'
-import SourceTrustBand from './components/SourceTrustBand.vue'
 import HotHeritageSection from './components/HotHeritageSection.vue'
 import PatternBackdrop from '@/components/PatternBackdrop.vue'
 
@@ -15,15 +13,13 @@ const router = useRouter()
 <template>
   <div class="home">
     <HeroSection />
-    <HeritageMarquee />
     <SceneAbilitySection />
     <WorkflowSection />
     <TechFeatureSection />
-    <SourceTrustBand />
     <HotHeritageSection />
 
     <!-- 底部转化区：引导进入 AI 创作 -->
-    <section v-reveal class="home__cta">
+    <section class="home__cta">
       <div class="home__cta-panel">
         <PatternBackdrop class="home__cta-texture" variant="crackle" />
 
