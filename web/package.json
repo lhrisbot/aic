@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "description": "遗韵智创 —— AI 非遗多模态内容创作平台（前端）",
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
