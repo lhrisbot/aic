@@ -208,7 +208,12 @@ watch(id, () => void load(), { immediate: true })
               </div>
 
               <div class="heritage-detail__related-grid">
-                <HeritageCard v-for="item in related" :key="item.id" :heritage="item" />
+                <HeritageCard
+                  v-for="(item, index) in related"
+                  :key="item.id"
+                  v-reveal="index * 70"
+                  :heritage="item"
+                />
               </div>
             </section>
           </main>

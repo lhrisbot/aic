@@ -190,8 +190,9 @@ watch(
 
       <div v-else class="works-page__grid">
         <WorkCard
-          v-for="work in store.list"
+          v-for="(work, index) in store.list"
           :key="work.id"
+          v-reveal="index * 60"
           :work="work"
           @view="openWork"
           @play="openWork"

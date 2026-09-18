@@ -153,6 +153,59 @@ button {
   opacity: 0;
 }
 
+/* ---------- 滚动入场（配套 src/directives/reveal.ts 的 v-reveal） ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 620ms var(--ease-out) var(--reveal-delay, 0ms),
+    transform 620ms var(--ease-out) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* ---------- 通用小动效 ---------- */
+/* 缓慢上下浮动：用于装饰元素 */
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(-6px);
+  }
+
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+/* 横向无缝滚动：用于词条走马灯 */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -166,5 +219,11 @@ button {
   .route-fade-enter-from,
   .route-fade-leave-to {
     transform: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

@@ -66,7 +66,12 @@ onMounted(load)
       </EmptyState>
 
       <div v-else class="hot-heritage__grid">
-        <HeritageCard v-for="item in list" :key="item.id" :heritage="item" />
+        <HeritageCard
+          v-for="(item, index) in list"
+          :key="item.id"
+          v-reveal="index * 70"
+          :heritage="item"
+        />
       </div>
     </div>
   </section>
