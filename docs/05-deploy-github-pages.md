@@ -119,3 +119,66 @@ Mock 账号库在各自浏览器的 `localStorage` 里，首次打开会自动�
 - [ ] 走一遍演示路径：首页 → 非遗探索 → 详情 → AI 创作 CTA → 登录（演示账号） → 生成并保存 → 视频创作 → 我的作品
 - [ ] 页面中不含学校名称、Logo、指导教师信息（提示词要求）
 - [ ] 仓库里没有真实 API Key / 令牌（本项目目前全是 Mock，无密钥）
+
+---
+
+## 6. 本项目的实际部署状态（已上线）
+
+| 项 | 值 |
+| --- | --- |
+| 代码仓库 | https://github.com/lhrisbot/aic （公开，默认分支 `main`） |
+| 线上站点 | **https://lhrisbot.github.io/aic/** |
+| Pages 源 | `gh-pages` 分支（`build_type: legacy`，即"从分支部署"） |
+| 构建前缀 | `/aic/`（仓库名，已写入构建产物） |
+| 页面标题实测 | 首页「首页 · 遗韵智创」；`/aic/heritage`「非遗探索 · 遗韵智创」；`/aic/heritage/shadow-puppetry`「皮影戏 · 遗韵智创」 |
+
+### 6.1 更新线上站点（改了代码之后）
+
+```powershell
+cd "D:\Users\26877\Desktop\aic主题赛\web"
+$env:PAGES_BASE='/aic/'
+npm.cmd run build:pages      # 构建（自动带 /aic/ 前缀 + 404.html + .nojekyll）
+npx gh-pages -d dist         # 把 dist 推到 gh-pages 分支，1~2 分钟后线上更新
+```
+
+改完源码记得先把 `main` 推上去，这样队友能拿到最新代码：
+
+```powershell
+cd "D:\Users\26877\Desktop\aic主题赛"
+git add -A; git commit -m "描述改动"; git push
+```
+
+### 6.2 想让"推送即自动部署"生效（可选）
+
+仓库里的自动部署工作流目前在 `docs/deploy-pages-workflow.yml`，**没有放进 `.github/workflows/`**，原因是：
+
+> 用 OAuth 令牌推送 `.github/workflows/**` 需要令牌具备 `workflow` 权限，
+> 当前 `gh` 登录的令牌只有 `gist / read:org / repo`，因此推送被 GitHub 拒绝了。
+
+两种启用方式，任选其一：
+
+**方式 A：网页端粘贴（不用命令行、不用重新授权）**
+
+1. 打开 https://github.com/lhrisbot/aic → `Add file` → `Create new file`
+2. 文件名填 `.github/workflows/deploy-pages.yml`
+3. 把 `docs/deploy-pages-workflow.yml` 的内容整段粘贴进去 → Commit
+4. 仓库 `Settings` → `Pages` → `Source` 改成 **`GitHub Actions`**
+5. 之后每次推 `main` 自动构建发布（Actions 标签页可看进度）
+
+**方式 B：给 gh 补授权，然后直接推送**
+
+```powershell
+$gh = "$env:LOCALAPPDATA\Programs\gh-portable\bin\gh.exe"
+& $gh auth refresh -h github.com -s workflow      # 会再弹一次浏览器授权
+mkdir ".github\workflows" -Force
+Copy-Item "docs\deploy-pages-workflow.yml" ".github\workflows\deploy-pages.yml"
+git add -A; git commit -m "ci: 启用 GitHub Pages 自动部署"; git push
+```
+
+### 6.3 本次推送踩过的两个坑（避免重复踩）
+
+1. **workflow 权限**：见 §6.2。若历史提交里已经含有 `.github/workflows/**`，整条分支都会被拒绝推送，
+   需要重写历史或用上面的方式 A/B 解决。
+2. **默认分支被推成了 `gh-pages`**：先推 `gh-pages` 时 GitHub 会把它设为默认分支，队友 `git clone` 拿到的会是构建产物而不是源码。
+   已用 `gh api -X PATCH repos/lhrisbot/aic -f default_branch=main` 修正；
+   换仓库时记得推完 `main` 后确认默认分支。
