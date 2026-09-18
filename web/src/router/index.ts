@@ -85,7 +85,14 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  /**
+   * history base 必须与 Vite 的 base 保持一致。
+   * 本地开发与常规部署时 BASE_URL 为 '/'；
+   * 部署到 GitHub Pages 项目站点（https://<用户名>.github.io/<仓库名>/）时，
+   * BASE_URL 会变成 '/<仓库名>/'，路由会自动剥掉这段前缀——
+   * 否则浏览器地址是 /<仓库名>/heritage，路由匹配不到任何规则，整站都会落到 404 页。
+   */
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior(_to, _from, savedPosition) {
     if (savedPosition) {

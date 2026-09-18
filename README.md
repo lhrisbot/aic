@@ -16,7 +16,8 @@
 │   ├── 01-architecture.md           架构设计：页面结构 / 路由 / 组件 / 数据模型 / 接口契约 / 视觉规范
 │   ├── 02-final-check.md            前端最终检查报告（55 个渲染检查点 + 主流程回归）
 │   ├── 03-handoff-backend.md        ★ 后端对接说明：15 个端点的请求/响应示例与约定
-│   └── 04-handoff-workflow.md       ★ Workflow 对接说明：需要哪些工作流、输入输出契约与验收清单
+│   ├── 04-handoff-workflow.md       ★ Workflow 对接说明：需要哪些工作流、输入输出契约与验收清单
+│   └── 05-deploy-github-pages.md    ★ 部署说明：GitHub Pages（自动/手动）/ Cloudflare / Vercel + 常见问题
 ├── web/                             前端工程（Vue 3 + Vite + TypeScript + Element Plus）
 │   ├── src/
 │   │   ├── api/                     接口层（Mock 与真实请求在这里切换）

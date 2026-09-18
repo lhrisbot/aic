@@ -4,6 +4,13 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
+  /**
+   * 资源前缀。
+   * 本地开发与常规部署都用 '/'；部署到 GitHub Pages 项目站点时，
+   * 地址是 https://<用户名>.github.io/<仓库名>/，需要带上仓库名前缀。
+   * 用 `npm run build:pages` 时会自动通过 VITE_BASE 传入，无需手改本文件。
+   */
+  base: process.env.VITE_BASE || '/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

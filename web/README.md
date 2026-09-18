@@ -19,8 +19,14 @@ npm run dev      # 开发服务，默认 http://127.0.0.1:5173/
 npm run type-check   # vue-tsc 类型检查
 npm run build        # 类型检查 + 生产构建
 npm run build:only   # 仅生产构建
+npm run build:pages  # GitHub Pages 专用构建（自动带仓库名前缀 + 404 回退 + .nojekyll）
 npm run preview      # 预览 dist 产物
 ```
+
+> **部署上线**：GitHub Pages / Cloudflare Pages / Vercel 的完整步骤与常见问题见
+> `../docs/05-deploy-github-pages.md`。
+> **让队友在局域网内直接打开**：`npm run preview -- --host 0.0.0.0 --port 4173`，
+> 然后把 `http://<你的局域网IP>:4173/` 发给他们（需放行该端口）。
 
 ## 技术栈
 
