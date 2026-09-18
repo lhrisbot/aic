@@ -4,6 +4,9 @@ dist/
 dist-ssr/
 *.local
 
+# 需求提示词原件：仅保留在本地，不随仓库上传
+deepseek_frontend_prompt.md
+
 # 验证与临时产物（渲染验证脚本生成的截图、DOM 快照等）
 .verify/
 *.tmpdir/
