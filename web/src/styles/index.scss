@@ -1,0 +1,8 @@
+/**
+ * 全局样式入口：令牌 → 基础排版 → 纹样 → Element Plus 对齐。
+ * 引入顺序即层叠顺序，需保持一致。
+ */
+@use './variables';
+@use './base';
+@use './patterns';
+@use './element-override';

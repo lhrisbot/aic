@@ -1,0 +1,92 @@
+/**
+ * SCSS 断点变量与公共 mixin。
+ * 组件中通过 `@use '@/styles/mixins' as *;` 引入（不产生额外 CSS 输出）。
+ */
+
+// 断点（与设计规范 §7.4 一致）
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1200px;
+$bp-2xl: 1440px;
+
+/// 小于指定断点（移动优先的下行查询）
+@mixin below($bp) {
+  @media (max-width: #{$bp - 1px}) {
+    @content;
+  }
+}
+
+/// 大于等于指定断点
+@mixin above($bp) {
+  @media (min-width: $bp) {
+    @content;
+  }
+}
+
+/// 标准卡片外观
+@mixin card($radius: var(--radius-lg)) {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: $radius;
+  box-shadow: var(--shadow-sm);
+}
+
+/// 卡片悬停：轻微上浮 + 阴影升级（配合 transition 使用）
+@mixin card-hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-color-strong);
+}
+
+/// 多行文本省略
+@mixin ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/// 键盘可达的焦点环
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/// 隐藏滚动条（保留滚动能力）
+@mixin scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/// 尊重系统「减少动态效果」设置
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+/// 页面主容器：统一最大宽度与安全边距
+@mixin container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding-inline: var(--container-padding);
+
+  @include above($bp-2xl) {
+    padding-inline: 40px;
+  }
+}

@@ -1,0 +1,107 @@
+/**
+ * 登录 / 注册卡片的共用样式。
+ * 通过 `@use '@/styles/auth-card';` 在页面的 scoped style 中引入。
+ * 说明：此处为共享样式模块，避免两个页面重复维护同一套视觉规则。
+ */
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--sp-10);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+
+  &__title {
+    font-size: var(--fs-2xl);
+  }
+
+  &__subtitle {
+    margin-top: var(--sp-2);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+
+  &__notice {
+    margin-top: var(--sp-6);
+    padding: var(--sp-4);
+    border-radius: var(--radius);
+    background: var(--bg-subtle);
+    border-left: 3px solid var(--color-ai);
+  }
+
+  &__notice-title {
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-primary);
+  }
+
+  &__notice-desc {
+    margin-top: var(--sp-1);
+    font-size: var(--fs-xs);
+    line-height: var(--lh-relaxed);
+    color: var(--text-secondary);
+  }
+
+  &__submit {
+    width: 100%;
+    margin-top: var(--sp-6);
+  }
+
+  /* ---------- 表单 ---------- */
+  &__form {
+    margin-top: var(--sp-6);
+
+    :deep(.el-form-item) {
+      margin-bottom: var(--sp-4);
+    }
+
+    :deep(.el-form-item__label) {
+      padding-bottom: 4px;
+      font-size: var(--fs-sm);
+      color: var(--text-secondary);
+    }
+  }
+
+  &__form-submit {
+    width: 100%;
+    margin-top: var(--sp-2);
+  }
+
+  /* ---------- 演示账号 ---------- */
+  &__demo {
+    margin-top: var(--sp-6);
+    padding-top: var(--sp-5);
+    border-top: 1px dashed var(--border-color);
+  }
+
+  &__demo-text {
+    font-size: var(--fs-xs);
+    line-height: var(--lh-relaxed);
+    color: var(--text-tertiary);
+  }
+
+  &__demo-code {
+    font-family: var(--font-mono);
+    color: var(--color-ai);
+  }
+
+  &__demo-actions {
+    margin-top: var(--sp-3);
+  }
+
+  &__footer {
+    margin-top: var(--sp-4);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  &__link {
+    color: var(--color-primary);
+
+    &:hover {
+      color: var(--color-primary-hover);
+    }
+  }
+}

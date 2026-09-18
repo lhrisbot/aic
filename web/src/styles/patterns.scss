@@ -1,0 +1,49 @@
+/**
+ * 传统纹样装饰（极淡）。
+ * 仅作为背景纹理出现，统一由 --pattern-opacity 控制强度，禁止高对比堆砌。
+ * 全部使用内联 SVG data-uri，不依赖外网资源，保证离线可用。
+ */
+
+/* 回纹（雷纹）：适合作为细边或卡片顶部装饰 */
+.pattern-fret {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M4 36V16h12v12H8v8M20 4v20h12V12h-8V4' fill='none' stroke='%231f1e1c' stroke-width='1.2'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: var(--pattern-opacity);
+}
+
+/* 冰裂纹：适合作为 Hero 与大区块的底纹 */
+.pattern-crackle {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='none' stroke='%231f1e1c' stroke-width='0.9'%3E%3Cpath d='M0 32l48 14 34-26 40 18 38-12'/%3E%3Cpath d='M0 96l36-22 42 26 44-14 38 16'/%3E%3Cpath d='M48 46l10 52M82 20l4 62M122 38l-2 66M36 74l-6 44M124 104l14 40'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: var(--pattern-opacity);
+}
+
+/* 云纹：适合作为页脚或 Banner 收边的柔和装饰 */
+.pattern-cloud {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cg fill='none' stroke='%231f1e1c' stroke-width='1.1'%3E%3Cpath d='M6 44c8-16 26-16 34 0'/%3E%3Cpath d='M40 44c8-16 26-16 34 0'/%3E%3Cpath d='M74 44c8-16 26-16 34 0'/%3E%3Cpath d='M22 18c6-12 20-12 26 0'/%3E%3Cpath d='M62 18c6-12 20-12 26 0'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: var(--pattern-opacity);
+}
+
+/* 经纬格：细密网格，作为分区之间的过渡纹理 */
+.pattern-grid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3Cpath d='M24 0v24M0 24h24' stroke='%231f1e1c' stroke-width='0.8' fill='none'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  opacity: calc(var(--pattern-opacity) * 0.8);
+}
+
+/* 朱红印章风格标记：用于强调「可信 / 已核验」语义的小色块 */
+.seal-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-serif);
+  font-size: var(--fs-xs);
+  letter-spacing: 1px;
+}
