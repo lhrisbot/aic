@@ -15,7 +15,10 @@ export function createVideoTask(payload: VideoCreateRequest): Promise<VideoTask>
   if (USE_MOCK) {
     return mockCreateVideoTask(payload)
   }
-  return http.post<VideoTask>('/video/generate', payload, { timeout: 60000 })
+  // simulate 只服务于 Mock 演示，真实后端不接收该字段。
+  const request = { ...payload }
+  delete request.simulate
+  return http.post<VideoTask>('/video/generate', request, { timeout: 60000 })
 }
 
 /** GET /api/video/:id/status */

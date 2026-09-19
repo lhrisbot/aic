@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { ElMessage } from 'element-plus'
 import { fetchHeritageById, fetchHeritages } from '@/api/heritage'
@@ -12,6 +12,7 @@ import { createWork, fetchWorkById, fetchWorks } from '@/api/work'
 import type { Heritage } from '@/types/heritage'
 import type { Storyboard, VideoTask } from '@/types/video'
 import type { Work } from '@/types/work'
+import { readCreationDraft } from '@/utils/creation-draft'
 import { markdownToSummary } from '@/utils/format'
 
 /** 状态轮询间隔与最大次数（约 1.2s × 40 ≈ 48s，避免异常情况下无限轮询） */
@@ -26,6 +27,7 @@ const POLL_MAX_ATTEMPTS = 40
 export const useVideoStore = defineStore('video', () => {
   /* ---------------- 数据来源 ---------------- */
   const sourceWork = ref<Work | null>(null)
+  const scriptContent = ref('')
   const heritage = ref<Heritage | null>(null)
   const title = ref('')
   const platform = ref('抖音')
@@ -69,15 +71,42 @@ export const useVideoStore = defineStore('video', () => {
     if (storyboards.value.length > 0) {
       return 2
     }
-    if (title.value) {
+    if (scriptContent.value.trim()) {
       return 1
     }
     return 0
   })
 
+  const timelineError = computed(() => {
+    let previousEnd = 0
+    for (const shot of storyboards.value) {
+      if (shot.start < 0 || shot.end <= shot.start) {
+        return `镜头 ${String(shot.index).padStart(2, '0')} 的时间范围无效`
+      }
+      if (shot.end > duration.value) {
+        return `镜头 ${String(shot.index).padStart(2, '0')} 超出视频总时长`
+      }
+      if (shot.start < previousEnd) {
+        return `镜头 ${String(shot.index).padStart(2, '0')} 与前一个镜头重叠`
+      }
+      previousEnd = shot.end
+    }
+    return ''
+  })
+
   const canCreateTask = computed(
-    () => hasSource.value && storyboards.value.length > 0 && !creating.value,
+    () =>
+      hasSource.value &&
+      storyboards.value.length > 0 &&
+      !timelineError.value &&
+      !creating.value,
   )
+
+  watch(duration, () => {
+    if (storyboards.value.length > 0) {
+      resetTaskState()
+    }
+  })
 
   /* ---------------- 选择器 ---------------- */
   async function loadOptions(): Promise<void> {
@@ -88,10 +117,12 @@ export const useVideoStore = defineStore('video', () => {
     try {
       const [heritagePage, workPage] = await Promise.all([
         fetchHeritages({ page: 1, pageSize: 100 }),
-        fetchWorks({ type: 'videoWork', page: 1, pageSize: 20 }),
+        fetchWorks({ page: 1, pageSize: 100 }),
       ])
       heritageOptions.value = heritagePage.list
-      videoWorks.value = workPage.list
+      videoWorks.value = workPage.list.filter(
+        (work) => work.type === 'video' || work.type === 'videoWork',
+      )
     } catch {
       heritageOptions.value = []
       videoWorks.value = []
@@ -107,6 +138,12 @@ export const useVideoStore = defineStore('video', () => {
     savedWorkId.value = ''
   }
 
+  // 用户改动主题稿后，原分镜和已提交的任务都不再对应当前文案。
+  watch(scriptContent, () => {
+    storyboards.value = []
+    resetTaskState()
+  }, { flush: 'sync' })
+
   /** 选择非遗项目作为视频主题 */
   async function applyHeritage(id: string): Promise<void> {
     if (!id) {
@@ -116,6 +153,7 @@ export const useVideoStore = defineStore('video', () => {
       const data = await fetchHeritageById(id)
       heritage.value = data
       sourceWork.value = null
+      scriptContent.value = ''
       storyboards.value = []
       resetTaskState()
       title.value = `${data.name} · ${style.value}非遗宣传短片`
@@ -132,6 +170,7 @@ export const useVideoStore = defineStore('video', () => {
     try {
       const work = await fetchWorkById(workId)
       sourceWork.value = work
+      scriptContent.value = work.content ?? ''
       title.value = work.title
       duration.value = work.duration ?? duration.value
       style.value = work.style ?? style.value
@@ -161,6 +200,7 @@ export const useVideoStore = defineStore('video', () => {
         heritageId: heritage.value.id,
         duration: duration.value,
         style: style.value,
+        ...(scriptContent.value.trim() ? { content: scriptContent.value.trim() } : {}),
       })
       storyboards.value = script.shots.map((shot) => ({ ...shot }))
       title.value = script.title
@@ -181,19 +221,43 @@ export const useVideoStore = defineStore('video', () => {
     storyboards.value = storyboards.value.map((shot, index) => ({ ...shot, index: index + 1 }))
   }
 
-  function updateShot(shot: Storyboard): void {
+  function updateShot(shot: Storyboard): boolean {
+    const currentIndex = storyboards.value.findIndex((item) => item.id === shot.id)
+    const previous = currentIndex > 0 ? storyboards.value[currentIndex - 1] : undefined
+    const next = currentIndex >= 0 ? storyboards.value[currentIndex + 1] : undefined
+
+    if (shot.start < 0 || shot.end <= shot.start || shot.end > duration.value) {
+      ElMessage.warning('分镜时间必须在视频总时长内，且结束时间要大于起始时间')
+      return false
+    }
+    if (previous && shot.start < previous.end) {
+      ElMessage.warning('当前分镜不能与前一个分镜重叠')
+      return false
+    }
+    if (next && shot.end > next.start) {
+      ElMessage.warning('当前分镜不能与后一个分镜重叠')
+      return false
+    }
+
     storyboards.value = storyboards.value.map((item) => (item.id === shot.id ? { ...shot } : item))
+    resetTaskState()
+    return true
   }
 
   function deleteShot(id: string): void {
     storyboards.value = storyboards.value.filter((shot) => shot.id !== id)
     renumber()
+    resetTaskState()
   }
 
   function addShot(): void {
     const last = storyboards.value[storyboards.value.length - 1]
     const start = last ? last.end : 0
-    const end = start + 5
+    const end = Math.min(start + 5, duration.value)
+    if (end <= start) {
+      ElMessage.warning('当前视频时长已没有可用的新增分镜时间')
+      return
+    }
     const index = storyboards.value.length + 1
     storyboards.value = [
       ...storyboards.value,
@@ -207,6 +271,7 @@ export const useVideoStore = defineStore('video', () => {
         prompt: 'custom shot, describe the visual you want',
       },
     ]
+    resetTaskState()
   }
 
   async function regenerateShot(shot: Storyboard): Promise<void> {
@@ -298,7 +363,7 @@ export const useVideoStore = defineStore('video', () => {
         style: style.value,
         duration: duration.value,
         storyboards: storyboards.value.map((shot) => ({ ...shot })),
-        simulate: simulateFailure.value ? 'failed' : 'success',
+        ...(simulateFailure.value ? { simulate: 'failed' as const } : {}),
       })
       task.value = created
       startPolling()
@@ -339,6 +404,8 @@ export const useVideoStore = defineStore('video', () => {
         type: 'videoWork',
         heritageId: task.value.heritageId,
         heritageName: task.value.heritageName,
+        // 保留用户确认后的主题稿，便于从「我的作品」再次进入视频页时继续编辑。
+        content: scriptContent.value.trim() || undefined,
         summary: markdownToSummary(
           `${task.value.style}风格 ${task.value.duration} 秒短视频，共 ${task.value.storyboards.length} 个分镜，目标平台 ${task.value.platform}。`,
           96,
@@ -347,6 +414,7 @@ export const useVideoStore = defineStore('video', () => {
         duration: task.value.duration,
         style: task.value.style,
         videoTaskId: task.value.id,
+        videoUrl: task.value.videoUrl,
         storyboards: task.value.storyboards.map((shot) => ({ ...shot })),
       })
       savedWorkId.value = work.id
@@ -364,8 +432,31 @@ export const useVideoStore = defineStore('video', () => {
   async function initWithQuery(query: {
     workId?: unknown
     heritageId?: unknown
+    draftId?: unknown
   }): Promise<void> {
     await loadOptions()
+
+    const draftId = typeof query.draftId === 'string' ? query.draftId : ''
+    if (draftId) {
+      const draft = readCreationDraft(draftId)
+      if (draft) {
+        sourceWork.value = null
+        scriptContent.value = draft.result.content
+        try {
+          heritage.value = await fetchHeritageById(draft.heritageId)
+        } catch {
+          ElMessage.error('非遗资料加载失败，请重新选择')
+          return
+        }
+        title.value = draft.result.videoScript?.title || draft.result.title
+        platform.value = draft.form.platform || platform.value
+        style.value = draft.form.style || style.value
+        duration.value = draft.result.videoScript?.duration ?? duration.value
+        storyboards.value = (draft.result.videoScript?.shots ?? []).map((shot) => ({ ...shot }))
+        resetTaskState()
+        return
+      }
+    }
 
     const workId = typeof query.workId === 'string' ? query.workId : ''
     if (workId && sourceWork.value?.id !== workId) {
@@ -387,6 +478,7 @@ export const useVideoStore = defineStore('video', () => {
   return {
     // 数据来源
     sourceWork,
+    scriptContent,
     heritage,
     title,
     platform,
@@ -413,6 +505,7 @@ export const useVideoStore = defineStore('video', () => {
     isGenerating,
     isSuccess,
     isFailed,
+    timelineError,
     activeStep,
     canCreateTask,
     // 动作

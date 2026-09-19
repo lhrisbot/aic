@@ -5,13 +5,15 @@
  * 1. 内容为面向宣传场景的科普性描述，用于比赛与课程演示；接入真实知识库后整体替换；
  * 2. `sources` 为示例性参考资料，取自公开机构资料类型（名录 / 博物馆展陈 / 地方志），
  *    正式版本需替换为可核验的条目与链接；
- * 3. `cover` 暂为空字符串，卡片与详情页由 `HeritageCover` 组件按类别与名称程序化生成
- *    渐变纹样封面（离线可用）；接入真实摄影图后只需填入图片地址即可，无需改组件逻辑。
+ * 3. `cover` 使用项目内生成的主题示意配图（并非真实档案照片），离线可用；
+ *    接入授权摄影素材后只需替换图片地址。
  */
 import { ALL } from '@/types/common'
 import type { PageResult } from '@/types/common'
 import type { Heritage, HeritageQuery } from '@/types/heritage'
 import { mockDelay } from '@/mock/utils'
+
+const coverUrl = (name: string): string => `${import.meta.env.BASE_URL}heritage/${name}.jpg`
 
 /** 首页热门推荐顺序（与提示词给定的六个项目一致，顺序固定） */
 export const HOT_HERITAGE_IDS: string[] = [
@@ -30,7 +32,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '皮影戏',
     category: '传统戏剧',
     region: '陕西',
-    cover: '',
+    cover: coverUrl('shadow-puppetry'),
     summary: '用兽皮雕刻影人、借灯光投映于幕布的民间戏剧，一人可操影、多人可配唱。',
     history:
       '关于皮影戏的起源，民间有汉代方士以影作戏、解帝王思念的传说；有文献与实物印证的成熟演出形态至宋代已相当普遍，元代以后随商贸与戏班流动传到中亚、西亚与欧洲。陕西关中一带戏曲传统深厚，形成了以碗碗腔、老腔等声腔配唱的皮影体系。',
@@ -90,7 +92,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '昆曲',
     category: '传统戏剧',
     region: '江苏',
-    cover: '',
+    cover: coverUrl('kunqu-opera'),
     summary: '以曲牌体唱腔与细腻身段著称的古老戏曲声腔，被后世剧种广泛吸收。',
     history:
       '昆曲形成于元末明初的江苏昆山一带。明代经魏良辅等人改良唱腔（后世称「水磨调」）后盛行，文人参与创作，使《牡丹亭》《长生殿》《桃花扇》等成为经典。清代中期以后虽受地方戏冲击，其唱腔与表演体系仍被众多剧种吸收。2001 年被联合国教科文组织列入首批人类口头和非物质遗产代表作名录。',
@@ -150,7 +152,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '苏绣',
     category: '传统美术',
     region: '江苏',
-    cover: '',
+    cover: coverUrl('su-embroidery'),
     summary: '以针代笔、以线代色的刺绣流派，讲究平、齐、细、密、匀、顺、和、光。',
     history:
       '苏州一带的刺绣传统可追溯至春秋时期的吴地，宋代随书画风气与城市经济兴盛而精进，明清时期形成商品化生产，出现专门的绣庄与行业分工。近代沈寿等人吸收西画光影观念，推动了仿真绣的发展。',
@@ -201,7 +203,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '剪纸',
     category: '传统美术',
     region: '陕西',
-    cover: '',
+    cover: coverUrl('paper-cutting'),
     summary: '用剪刀或刻刀在纸上镂空的民间美术形式，常见于窗花、喜花与节令装饰。',
     history:
       '剪纸依托造纸术出现而发展，新疆出土的北朝团花剪纸是现存较早的实物。明清以后各地形成不同风格，北方粗犷、南方灵巧，题材多与年节、婚俗和民间信仰相关。2009 年「中国剪纸」被列入联合国教科文组织人类非物质文化遗产代表作名录。',
@@ -261,7 +263,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '景泰蓝',
     category: '传统技艺',
     region: '北京',
-    cover: '',
+    cover: coverUrl('cloisonne'),
     summary: '正式名称为铜胎掐丝珐琅，以细铜丝掐出纹样、填入珐琅釉料后烧制打磨。',
     history:
       '掐丝珐琅工艺约在元代经西亚传入中国，明代景泰年间制作兴盛、釉色以蓝著称，故得俗称「景泰蓝」。清代宫廷设厂制作，工艺与配色更为繁复；近代由宫廷工艺转向民间工坊与出口商品，形成了北京地区的工艺传统。',
@@ -321,7 +323,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '川剧变脸',
     category: '传统戏剧',
     region: '四川',
-    cover: '',
+    cover: coverUrl('sichuan-opera-face-changing'),
     summary: '川剧中的特技表演，演员在瞬间变换面部脸谱，用以表现情绪的骤然转折。',
     history:
       '川剧由昆、高、胡、弹、灯五种声腔融合而成，流行于四川、重庆及周边地区。变脸作为其中的特技，在二十世纪的演出实践中不断丰富，成为川剧最具辨识度的表演符号之一。',
@@ -372,7 +374,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '古琴',
     category: '传统音乐',
     region: '北京',
-    cover: '',
+    cover: coverUrl('guqin'),
     summary: '又称七弦琴，中国最古老的弹拨乐器之一，以减字谱记谱，重意境与气韵。',
     history:
       '古琴的历史可上溯至先秦，文献与考古出土的早期弦乐器互证了其久远传统。汉魏以来文人以琴修身，「琴棋书画」以琴为首。2003 年古琴艺术被列入联合国教科文组织人类非物质文化遗产代表作名录。',
@@ -432,7 +434,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '龙泉青瓷',
     category: '传统技艺',
     region: '浙江',
-    cover: '',
+    cover: coverUrl('longquan-celadon'),
     summary: '浙江龙泉一带烧制的青釉瓷器，以粉青、梅子青釉色温润如玉著称。',
     history:
       '龙泉窑始烧于三国两晋，南宋至元代达到鼎盛，产品经海路远销东亚、西亚与东非。明代中期以后逐渐衰落，二十世纪经考古调查与艺人恢复重新烧制。2009 年龙泉青瓷传统烧制技艺被列入联合国教科文组织人类非物质文化遗产代表作名录。',
@@ -483,7 +485,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '苗族银饰',
     category: '传统技艺',
     region: '其他',
-    cover: '',
+    cover: coverUrl('miao-silver'),
     summary: '苗族传统服饰中的银质装饰与锻制技艺，头饰、项圈、手镯成套佩戴。',
     history:
       '苗族有以银为饰的传统，银饰既是审美表达，也被视为家庭财富的储存形式。明清以来，黔东南、湘西等地的银饰锻制形成较完整的行业与工坊体系，技艺在家族与村寨之间传承。',
@@ -534,7 +536,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '木版年画',
     category: '传统美术',
     region: '其他',
-    cover: '',
+    cover: coverUrl('woodblock-new-year-print'),
     summary: '用木版套色印刷、供年节张贴的民间绘画，题材多为门神、灶王与吉祥故事。',
     history:
       '木版年画随雕版印刷术普及而兴起，宋代已有相关记载，明清时期形成天津杨柳青、苏州桃花坞、山东杨家埠、河南朱仙镇等各具特色的产地。近代因印刷技术变化一度衰落，二十世纪后经抢救与整理逐步恢复。',
@@ -585,7 +587,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '南京云锦',
     category: '传统技艺',
     region: '江苏',
-    cover: '',
+    cover: coverUrl('nanjing-brocade'),
     summary: '以木机妆花手工织造的丝织珍品，用料考究，古有「寸锦寸金」之说。',
     history:
       '南京的丝织业自东晋南朝以来渐成规模，元代设官办织造机构，明清时期江宁织造府掌管皇家织造，云锦工艺达到顶峰。2009 年南京云锦木机妆花手工织造技艺被列入联合国教科文组织人类非物质文化遗产代表作名录。',
@@ -636,7 +638,7 @@ export const HERITAGE_DATABASE: Heritage[] = [
     name: '广东醒狮',
     category: '传统舞蹈',
     region: '广东',
-    cover: '',
+    cover: coverUrl('guangdong-lion-dance'),
     summary: '融武术、舞蹈与锣鼓于一体的狮舞形式，造型威武、动作刚健。',
     history:
       '狮舞在岭南的形成与民间武馆、宗族活动关系密切，清代以来随粤籍移民传播到东南亚与世界各地。「醒狮」之名含唤醒、振奋之意，逢年节、开业与庆典常受邀表演。',

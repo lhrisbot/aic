@@ -312,6 +312,7 @@ export function mockGenerateVideoScript(payload: {
   heritageId: string
   duration: number
   style?: string
+  content?: string
 }): Promise<VideoScript> {
   let script: VideoScript
   try {
@@ -320,6 +321,13 @@ export function mockGenerateVideoScript(payload: {
       { name: heritage.name, region: heritage.region, category: heritage.category },
       payload.duration,
     )
+    const confirmedCopy = payload.content
+      ?.split(/\n+/)
+      .map((line) => line.replace(/[#>*`_\[\]()]/g, ' ').trim())
+      .find((line) => line.length > 18 && !line.startsWith('|') && !line.startsWith('-'))
+    if (confirmedCopy && storyboards[0]) {
+      storyboards[0].narration = confirmedCopy.slice(0, 28)
+    }
     script = {
       id: `vs_${Date.now().toString(36)}`,
       title: `${heritage.name} · ${payload.style ?? '国潮'}非遗宣传短片`,

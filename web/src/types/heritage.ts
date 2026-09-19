@@ -24,6 +24,10 @@ export interface Source {
   content: string
   /** 来源（志书 / 期刊 / 博物馆 / 官方网站等） */
   source: string
+  /** 可核验的资料页面或扫描件地址；演示资料允许为空 */
+  url?: string
+  /** 页码、段落或馆藏编号 */
+  locator?: string
   /** 相关度 0~1，展示为百分比 */
   similarity: number
   /** 来源类型（展示用徽标，可选） */
@@ -44,7 +48,7 @@ export interface Heritage {
   name: string
   category: HeritageCategory
   region: HeritageRegion
-  /** 封面图地址（当前为本地生成的 SVG，后续可替换为真实摄影图） */
+  /** 封面图地址（当前为项目内置的 AI 主题示意图，后续可替换为授权素材） */
   cover: string
   /** 一句简介 */
   summary: string

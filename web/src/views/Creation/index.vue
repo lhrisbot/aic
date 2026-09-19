@@ -48,6 +48,7 @@ watch(
   <div class="creation">
     <header class="creation__header u-container">
       <div class="creation__intro">
+        <p class="creation__eyebrow"><span aria-hidden="true" /> AI CONTENT STUDIO</p>
         <h1 class="creation__title">AI 创作</h1>
         <p class="creation__subtitle">
           选择非遗项目与创作场景，AI 会先检索知识库中的可信资料，再生成可直接使用的场景化内容。
@@ -57,47 +58,63 @@ watch(
       <div v-if="store.heritage" class="creation__summary">
         <span class="creation__chip is-heritage">{{ store.heritage.name }}</span>
         <span class="creation__chip">{{ store.sceneLabel }}</span>
-        <span class="creation__chip is-ai">引用 {{ store.sources.length }} 条资料</span>
+        <span class="creation__chip is-ai">{{ store.result ? '本次引用' : '可参考资料' }} {{ store.sources.length }} 条</span>
       </div>
     </header>
 
-    <div
-      class="creation__grid u-container"
-      :class="{
-        'is-xl-narrow': isBelowXl,
-        'is-narrow': isBelowLg,
-        'is-compact': isBelowMd,
-      }"
-    >
-      <!-- 左栏：创作设置 -->
-      <aside class="creation__aside">
-        <button
-          v-if="isBelowMd"
-          class="creation__collapse"
-          type="button"
-          :aria-expanded="settingsOpen"
-          @click="settingsOpen = !settingsOpen"
-        >
-          <span class="creation__collapse-label">创作设置</span>
-          <span class="creation__collapse-summary">{{ settingsSummary }}</span>
-          <el-icon :size="14">
-            <ArrowUp v-if="settingsOpen" />
-            <ArrowDown v-else />
-          </el-icon>
-        </button>
+    <div class="creation__workspace u-container">
+      <div class="creation__workspace-head">
+        <div>
+          <span class="creation__workspace-kicker">WORKSPACE / 01</span>
+          <strong>一站式文化内容生产台</strong>
+        </div>
+        <div class="creation__workspace-flow" aria-label="AI 创作工作流">
+          <span :class="{ 'is-active': store.heritageLoading, 'is-done': store.heritage }">01 资料检索</span>
+          <i>→</i>
+          <span :class="{ 'is-active': store.heritage && !store.generating && !store.result, 'is-done': store.result }">02 参数配置</span>
+          <i>→</i>
+          <span :class="{ 'is-active': store.generating, 'is-done': store.result }">03 生成结果</span>
+        </div>
+      </div>
 
-        <CreationPanel v-show="!settingsCollapsed" />
-      </aside>
+      <div
+        class="creation__grid"
+        :class="{
+          'is-xl-narrow': isBelowXl,
+          'is-narrow': isBelowLg,
+          'is-compact': isBelowMd,
+        }"
+      >
+        <!-- 左栏：创作设置 -->
+        <aside class="creation__aside">
+          <button
+            v-if="isBelowMd"
+            class="creation__collapse"
+            type="button"
+            :aria-expanded="settingsOpen"
+            @click="settingsOpen = !settingsOpen"
+          >
+            <span class="creation__collapse-label">创作设置</span>
+            <span class="creation__collapse-summary">{{ settingsSummary }}</span>
+            <el-icon :size="14">
+              <ArrowUp v-if="settingsOpen" />
+              <ArrowDown v-else />
+            </el-icon>
+          </button>
 
-      <!-- 中栏：生成结果 -->
-      <main class="creation__main">
-        <GenerationPanel />
-      </main>
+          <CreationPanel v-show="!settingsCollapsed" />
+        </aside>
 
-      <!-- 右栏：参考知识（宽屏内联，窄屏抽屉） -->
-      <aside v-if="!isBelowLg" class="creation__knowledge">
-        <KnowledgePanel />
-      </aside>
+        <!-- 中栏：生成结果 -->
+        <main class="creation__main">
+          <GenerationPanel />
+        </main>
+
+        <!-- 右栏：参考知识（宽屏内联，窄屏抽屉） -->
+        <aside v-if="!isBelowLg" class="creation__knowledge">
+          <KnowledgePanel />
+        </aside>
+      </div>
     </div>
 
     <!-- 窄屏：参考资料抽屉 -->
@@ -105,7 +122,7 @@ watch(
       v-model="knowledgeDrawer"
       title="AI 参考资料"
       direction="rtl"
-      size="340px"
+      size="min(340px, 92vw)"
     >
       <KnowledgePanel />
     </el-drawer>
@@ -129,7 +146,20 @@ watch(
 @use '@/styles/mixins' as *;
 
 .creation {
+  position: relative;
   padding-bottom: var(--sp-16);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 6%;
+    width: min(520px, 46vw);
+    height: 240px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(63, 107, 115, 0.11), transparent 72%);
+    filter: blur(2px);
+  }
 
   &__header {
     display: flex;
@@ -149,6 +179,23 @@ watch(
   &__title {
     font-size: var(--fs-3xl);
     letter-spacing: 1px;
+  }
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-3);
+    color: var(--color-ai);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.4px;
+
+    span {
+      width: 24px;
+      height: 1px;
+      background: var(--color-ai);
+    }
   }
 
   &__subtitle {
@@ -208,6 +255,91 @@ watch(
     }
   }
 
+  &__workspace {
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--sp-4);
+    padding-bottom: var(--sp-4);
+    border: 1px solid var(--border-color-strong);
+    border-radius: 28px;
+    background:
+      radial-gradient(70% 100% at 100% 0%, rgba(63, 107, 115, 0.08), transparent 62%),
+      radial-gradient(60% 90% at 0% 100%, rgba(192, 80, 60, 0.08), transparent 64%),
+      var(--bg-subtle);
+    box-shadow: 0 18px 44px rgba(76, 67, 56, 0.1);
+
+    @include below($bp-md) {
+      padding-top: var(--sp-3);
+      padding-bottom: var(--sp-3);
+      border-radius: var(--radius-lg);
+    }
+  }
+
+  &__workspace-head {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-5);
+    padding: 0 var(--sp-5) var(--sp-4);
+    color: var(--text-primary);
+
+    strong {
+      display: block;
+      margin-top: 4px;
+      font-family: var(--font-serif);
+      font-size: var(--fs-md);
+      font-weight: var(--fw-medium);
+    }
+
+    @include below($bp-md) {
+      align-items: flex-start;
+      flex-direction: column;
+      padding-inline: var(--sp-4);
+    }
+  }
+
+  &__workspace-kicker {
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.3px;
+  }
+
+  &__workspace-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-tertiary);
+    font-size: 11px;
+
+    span {
+      white-space: nowrap;
+    }
+
+    .is-active {
+      color: var(--color-primary);
+      font-weight: var(--fw-semibold);
+    }
+
+    .is-done {
+      color: var(--color-success);
+    }
+
+    i {
+      color: var(--border-color-strong);
+      font-style: normal;
+    }
+
+    @include below($bp-md) {
+      width: 100%;
+      justify-content: space-between;
+      gap: 4px;
+      font-size: 10px;
+    }
+  }
+
   &__aside,
   &__knowledge {
     position: sticky;
@@ -221,6 +353,21 @@ watch(
       max-height: none;
       overflow: visible;
       padding-right: 0;
+    }
+  }
+
+  &__workspace > &__grid {
+    position: relative;
+    z-index: 1;
+    padding: var(--sp-3);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.58);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+
+    @include below($bp-md) {
+      padding: var(--sp-2);
+      border-radius: 16px;
     }
   }
 

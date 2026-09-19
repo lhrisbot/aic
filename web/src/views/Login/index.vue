@@ -5,6 +5,7 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Lock, User } from '@element-plus/icons-vue'
 import { DEMO_ACCOUNT, PASSWORD_MIN } from '@/config/constants'
 import { useUserStore } from '@/stores/user'
+import { USE_MOCK } from '@/utils/request'
 
 /**
  * 登录页。
@@ -110,7 +111,7 @@ async function handleDemoLogin(): Promise<void> {
       </el-button>
     </el-form>
 
-    <div class="auth-card__demo">
+    <div v-if="USE_MOCK" class="auth-card__demo">
       <p class="auth-card__demo-text">
         演示账号：<span class="auth-card__demo-code">{{ DEMO_ACCOUNT.username }}</span>
         / <span class="auth-card__demo-code">{{ DEMO_ACCOUNT.password }}</span>

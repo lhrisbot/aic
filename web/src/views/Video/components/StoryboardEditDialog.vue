@@ -7,6 +7,7 @@ import type { Storyboard } from '@/types/video'
 const props = defineProps<{
   modelValue: boolean
   shot: Storyboard | null
+  duration: number
 }>()
 
 const emit = defineEmits<{
@@ -32,8 +33,8 @@ function handleSubmit(): void {
   if (!draft.value) {
     return
   }
-  if (draft.value.end <= draft.value.start) {
-    ElMessage.warning('结束时间需要大于起始时间')
+  if (draft.value.end <= draft.value.start || draft.value.end > props.duration) {
+    ElMessage.warning(`分镜时间必须在 0-${props.duration} 秒内，且结束时间要大于起始时间`)
     return
   }
   emit('submit', { ...draft.value })
@@ -52,11 +53,11 @@ function handleSubmit(): void {
       <div class="shot-form__timeline">
         <div class="shot-form__field">
           <label class="shot-form__label">起始（秒）</label>
-          <el-input-number v-model="draft.start" :min="0" :max="600" :step="1" />
+          <el-input-number v-model="draft.start" :min="0" :max="duration" :step="1" />
         </div>
         <div class="shot-form__field">
           <label class="shot-form__label">结束（秒）</label>
-          <el-input-number v-model="draft.end" :min="1" :max="600" :step="1" />
+          <el-input-number v-model="draft.end" :min="1" :max="duration" :step="1" />
         </div>
         <p class="shot-form__tip">本镜时长 {{ Math.max(draft.end - draft.start, 0) }} 秒</p>
       </div>

@@ -13,6 +13,7 @@ const props = defineProps<{
   source: Source
   /** 序号，用于与正文引用角标对应（可选） */
   index?: number
+  anchorId?: string
 }>()
 
 const typeLabel = computed(() =>
@@ -23,7 +24,7 @@ const similarityText = computed(() => formatPercent(props.source.similarity))
 </script>
 
 <template>
-  <article class="source-card">
+  <article :id="anchorId" class="source-card">
     <header class="source-card__head">
       <span v-if="index" class="source-card__index">[{{ index }}]</span>
       <h4 class="source-card__title">{{ source.title }}</h4>
@@ -34,7 +35,10 @@ const similarityText = computed(() => formatPercent(props.source.similarity))
 
     <footer class="source-card__foot">
       <span class="source-card__meta">
-        {{ source.source }}<template v-if="source.year"> · {{ source.year }}</template>
+        <a v-if="source.url" :href="source.url" target="_blank" rel="noopener noreferrer">{{ source.source }} ↗</a>
+        <template v-else>{{ source.source }}</template>
+        <template v-if="source.year"> · {{ source.year }}</template>
+        <template v-if="source.locator"> · {{ source.locator }}</template>
       </span>
 
       <span class="source-card__similarity">
@@ -52,6 +56,7 @@ const similarityText = computed(() => formatPercent(props.source.similarity))
 @use '@/styles/mixins' as *;
 
 .source-card {
+  scroll-margin-top: calc(var(--header-height) + 20px);
   padding: var(--sp-5);
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -62,6 +67,11 @@ const similarityText = computed(() => formatPercent(props.source.similarity))
 
   &:hover {
     box-shadow: var(--shadow);
+  }
+
+  &:target {
+    border-color: var(--color-ai);
+    box-shadow: 0 0 0 3px var(--color-ai-soft);
   }
 
   &__head {
@@ -121,6 +131,8 @@ const similarityText = computed(() => formatPercent(props.source.similarity))
   &__meta {
     font-size: var(--fs-xs);
     color: var(--text-tertiary);
+
+    a { color: var(--color-ai); text-decoration: underline; text-underline-offset: 2px; }
   }
 
   &__similarity {

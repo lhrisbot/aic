@@ -17,6 +17,7 @@ import {
 import type { CreationFormModel, CreationResult, SceneType } from '@/types/ai'
 import type { Heritage } from '@/types/heritage'
 import type { Work } from '@/types/work'
+import { saveCreationDraft } from '@/utils/creation-draft'
 import { markdownToSummary } from '@/utils/format'
 
 /**
@@ -37,6 +38,7 @@ export const useCreationStore = defineStore('creation', () => {
   const heritageFailed = ref(false)
   /** 用于丢弃过期请求（连续切换项目时避免旧响应覆盖新选择） */
   let heritageSeq = 0
+  let generationSeq = 0
 
   /* ---------------- 创作参数 ---------------- */
   const form = ref<CreationFormModel>(createDefaultForm())
@@ -89,6 +91,11 @@ export const useCreationStore = defineStore('creation', () => {
   async function selectHeritage(id: string): Promise<void> {
     form.value.heritageId = id
     heritageSeq += 1
+    generationSeq += 1
+    result.value = null
+    savedWorkId.value = ''
+    errorMessage.value = ''
+    heritage.value = null
     const seq = heritageSeq
 
     if (!id) {
@@ -128,6 +135,7 @@ export const useCreationStore = defineStore('creation', () => {
       return
     }
     form.value = applySceneDefaults(form.value, scene)
+    generationSeq += 1
     result.value = null
     savedWorkId.value = ''
     errorMessage.value = ''
@@ -136,6 +144,10 @@ export const useCreationStore = defineStore('creation', () => {
   /** 更新单个参数（由 sceneSchema 驱动的动态表单调用） */
   function setField(field: SceneField, value: string): void {
     writeFieldValue(form.value, field, value)
+    generationSeq += 1
+    result.value = null
+    savedWorkId.value = ''
+    errorMessage.value = ''
   }
 
   /** 读取单个参数值（表单组件用） */
@@ -152,14 +164,17 @@ export const useCreationStore = defineStore('creation', () => {
     }
 
     generating.value = true
+    const seq = ++generationSeq
     errorMessage.value = ''
     savedWorkId.value = ''
 
     try {
       const data = await generateCreation(buildCreationRequest(form.value))
+      if (seq !== generationSeq) return null
       result.value = data
       return data
     } catch (error) {
+      if (seq !== generationSeq) return null
       result.value = null
       errorMessage.value = error instanceof Error ? error.message : '生成失败，请稍后重试'
       ElMessage.error(errorMessage.value)
@@ -179,7 +194,34 @@ export const useCreationStore = defineStore('creation', () => {
     if (!result.value) {
       return
     }
-    result.value = { ...result.value, content }
+    // 文案一旦修改，旧分镜不再对应当前内容，必须重新拆分。
+    result.value = { ...result.value, content, videoScript: undefined }
+    savedWorkId.value = ''
+  }
+
+  /**
+   * 保存一份短期草稿，供「进入视频创作」继续使用当前结果。
+   * 真实后端接入后可以把这里替换为 POST /drafts，不改变页面调用方式。
+   */
+  function createVideoDraft(): string | null {
+    if (!result.value || !heritage.value) {
+      return null
+    }
+
+    return saveCreationDraft({
+      heritageId: heritage.value.id,
+      heritageName: heritage.value.name,
+      form: { ...form.value, extra: { ...form.value.extra } },
+      result: {
+        ...result.value,
+        videoScript: result.value.videoScript
+          ? {
+              ...result.value.videoScript,
+              shots: result.value.videoScript.shots.map((shot) => ({ ...shot })),
+            }
+          : undefined,
+      },
+    })
   }
 
   /** 短视频场景：由文案进一步生成分镜脚本 */
@@ -195,6 +237,7 @@ export const useCreationStore = defineStore('creation', () => {
         heritageId: heritage.value.id,
         duration: durationSeconds.value,
         style: form.value.style,
+        content: result.value.content,
       })
       result.value = { ...result.value, videoScript: script }
       ElMessage.success('分镜脚本已生成')
@@ -304,6 +347,7 @@ export const useCreationStore = defineStore('creation', () => {
     generate,
     regenerate,
     updateContent,
+    createVideoDraft,
     generateScript,
     saveWork,
     resetResult,

@@ -16,9 +16,6 @@ const store = useVideoStore()
 const shotCount = computed(() => store.storyboards.length)
 const totalSeconds = computed(() => store.duration)
 
-async function handleScriptRefresh(): Promise<void> {
-  await store.ensureScript(true)
-}
 </script>
 
 <template>
@@ -57,14 +54,10 @@ async function handleScriptRefresh(): Promise<void> {
       </span>
 
       <div class="video-meta__actions">
-        <span class="video-meta__hint">修改时长或风格后建议重新拆分分镜</span>
-        <el-button
-          size="small"
-          :loading="store.scriptLoading"
-          @click="handleScriptRefresh"
-        >
-          重新生成脚本
-        </el-button>
+        <span v-if="store.timelineError" class="video-meta__error">
+          {{ store.timelineError }}
+        </span>
+        <span v-else class="video-meta__hint">修改时长或风格后，请在下方按当前脚本重新拆分分镜</span>
       </div>
     </div>
   </section>
@@ -141,6 +134,11 @@ async function handleScriptRefresh(): Promise<void> {
   &__hint {
     font-size: var(--fs-xs);
     color: var(--text-tertiary);
+  }
+
+  &__error {
+    font-size: var(--fs-xs);
+    color: var(--color-danger);
   }
 }
 </style>

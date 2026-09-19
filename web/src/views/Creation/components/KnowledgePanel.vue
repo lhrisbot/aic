@@ -6,6 +6,7 @@ import { useCreationStore } from '@/stores/creation'
 import SourceCard from '@/components/SourceCard.vue'
 import SkeletonBlock from '@/components/SkeletonBlock.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import { USE_MOCK } from '@/utils/request'
 
 /**
  * 右栏：AI 参考资料。
@@ -16,9 +17,11 @@ import EmptyState from '@/components/EmptyState.vue'
 const store = useCreationStore()
 
 const noteText = computed(() =>
-  store.sourcesFromResult
-    ? '本次生成基于知识库中的可信资料，而不是完全自由生成。正文中的资料引用与下列条目一一对应。'
-    : 'AI 将基于以下知识库资料进行创作，生成后会在此处显示本次实际引用的资料与相关度。',
+  USE_MOCK
+    ? '当前为演示资料，来源名称和相关度仅用于展示检索流程；正式使用前需由知识库返回可核验链接。'
+    : store.sourcesFromResult
+      ? '本次生成依据下列资料。点击正文引用编号可以定位到对应来源。'
+      : 'AI 将基于以下知识库资料进行创作，生成后会在此处显示本次实际引用的资料与相关度。',
 )
 </script>
 
@@ -60,6 +63,7 @@ const noteText = computed(() =>
           :key="source.id"
           :source="source"
           :index="index + 1"
+          :anchor-id="`source-${source.id}`"
         />
       </div>
 

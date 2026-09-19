@@ -15,6 +15,7 @@ import { useUserStore } from '@/stores/user'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const headerTone = computed(() => String(route.meta.layout ?? 'public'))
 
 /** 滚动后为导航栏加上描边与阴影，避免与内容粘连 */
 const scrolled = ref(false)
@@ -108,7 +109,10 @@ function handleCommand(command: string | number | object): void {
 </script>
 
 <template>
-  <header class="app-header" :class="{ 'is-scrolled': scrolled }">
+  <header
+    class="app-header"
+    :class="[`is-${headerTone}`, { 'is-scrolled': scrolled }]"
+  >
     <div class="app-header__inner u-container">
       <RouterLink to="/" class="app-header__brand" @click="closeDrawer">
         <span class="app-header__mark">遗</span>
@@ -178,7 +182,12 @@ function handleCommand(command: string | number | object): void {
   </header>
 
   <!-- 移动端导航抽屉 -->
-  <el-drawer v-model="drawerVisible" direction="rtl" size="280px" :with-header="false">
+  <el-drawer
+    v-model="drawerVisible"
+    direction="rtl"
+    size="min(280px, 88vw)"
+    :with-header="false"
+  >
     <div class="drawer">
       <div class="drawer__brand">
         <span class="app-header__mark">遗</span>
@@ -263,6 +272,18 @@ function handleCommand(command: string | number | object): void {
   &.is-scrolled {
     border-bottom-color: var(--border-color);
     box-shadow: var(--shadow-sm);
+  }
+
+  &.is-studio {
+    background: rgba(232, 242, 240, 0.9);
+  }
+
+  &.is-production {
+    background: rgba(249, 239, 234, 0.92);
+  }
+
+  &.is-editorial {
+    background: rgba(248, 244, 237, 0.92);
   }
 
   &__inner {

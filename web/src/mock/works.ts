@@ -151,6 +151,7 @@ const PRESET_WORKS: Work[] = [
     type: 'videoWork',
     heritageId: 'shadow-puppetry',
     heritageName: '皮影戏',
+    content: '走进陕西皮影戏的幕后：从雕刻牛皮影人到操纵光影，让年轻观众亲手体验。',
     summary: '30 秒国潮风格短片：从幕布亮起到年轻观众围拢，5 个镜头完成一次"老手艺的新表达"。',
     cover: '',
     duration: 30,
@@ -169,6 +170,7 @@ const PRESET_WORKS: Work[] = [
     type: 'videoWork',
     heritageId: 'sichuan-opera-face-changing',
     heritageName: '川剧变脸',
+    content: '用 15 秒捕捉川剧变脸的瞬间：从脸谱亮相到观众惊叹，让传统特技进入今天的信息流。',
     summary: '15 秒快节奏短片：以变脸瞬间的节奏感为主，适合短视频平台的信息流投放。',
     cover: '',
     duration: 15,
@@ -204,7 +206,7 @@ const WORKS_KEY = 'mock-works'
 
 function loadWorks(): Work[] {
   const stored = getStorage<Work[] | null>(WORKS_KEY, null)
-  if (!Array.isArray(stored) || stored.length === 0) {
+  if (!Array.isArray(stored)) {
     return PRESET_WORKS.map(normalizeWork)
   }
   return stored.map(normalizeWork)
@@ -291,6 +293,7 @@ export function mockCreateWork(payload: Partial<Work>): Promise<Work> {
     duration: payload.duration,
     style: payload.style,
     videoTaskId: payload.videoTaskId,
+    videoUrl: payload.videoUrl,
     storyboards: payload.storyboards,
     createdAt: now,
     updatedAt: now,

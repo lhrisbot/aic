@@ -185,9 +185,9 @@ watch(
         <el-button type="primary" @click="clearFilters">清除筛选条件</el-button>
       </EmptyState>
 
-      <div v-else class="heritage-list__grid">
+      <TransitionGroup v-else name="card" tag="div" class="heritage-list__grid">
         <HeritageCard v-for="item in list" :key="item.id" :heritage="item" />
-      </div>
+      </TransitionGroup>
 
       <div
         v-if="!loading && !failed && total > HERITAGE_PAGE_SIZE"
@@ -273,6 +273,7 @@ watch(
   }
 
   &__grid {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--sp-6);

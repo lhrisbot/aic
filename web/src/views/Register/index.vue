@@ -111,7 +111,7 @@ async function handleSubmit(): Promise<void> {
         <el-input
           v-model="form.email"
           size="large"
-          placeholder="用于找回账号"
+          placeholder="用于账号联系"
           :prefix-icon="Message"
           autocomplete="email"
         />

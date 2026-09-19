@@ -20,7 +20,7 @@ const emit = defineEmits<{
 
 const draft = ref({ title: '', content: '', summary: '' })
 
-const isVideo = computed(() => props.work?.type === 'video')
+const isVideo = computed(() => props.work?.type === 'video' || props.work?.type === 'videoWork')
 
 watch(
   () => [props.modelValue, props.work] as const,

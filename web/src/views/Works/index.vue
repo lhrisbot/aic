@@ -29,6 +29,12 @@ const filters = computed(() => parseWorkQuery(route.query))
 const hasFilter = computed(
   () => Boolean(filters.value.keyword) || filters.value.type !== ALL,
 )
+const videoWorkCount = computed(
+  () => store.list.filter((work) => work.type === 'video' || work.type === 'videoWork').length,
+)
+const writingWorkCount = computed(
+  () => store.list.filter((work) => work.type !== 'video' && work.type !== 'videoWork').length,
+)
 
 /** 更新 URL query（空值与「全部」不写入，保持地址栏干净） */
 function setQuery(patch: Record<string, string | number | undefined>): void {
@@ -120,6 +126,7 @@ watch(
   <div class="works-page">
     <header class="works-page__header u-container">
       <div>
+        <p class="works-page__eyebrow"><span aria-hidden="true" /> CONTENT LIBRARY</p>
         <h1 class="works-page__title">我的作品</h1>
         <p class="works-page__subtitle">
           AI 生成的文案与视频作品集中在这里，可随时查看、编辑，或带着脚本继续到视频创作页加工。
@@ -136,6 +143,29 @@ watch(
         新建作品
       </el-button>
     </header>
+
+    <section class="works-page__dashboard u-container" aria-label="作品资产概览">
+      <div class="works-page__dashboard-intro">
+        <span class="works-page__dashboard-kicker">CONTENT ASSETS</span>
+        <strong>你的文化内容资产</strong>
+        <p>把灵感、脚本与成片留在同一个工作流里。</p>
+      </div>
+      <div class="works-page__metric">
+        <span>全部作品</span>
+        <strong>{{ store.total }}</strong>
+        <small>已保存内容</small>
+      </div>
+      <div class="works-page__metric is-ai">
+        <span>视频 / 分镜</span>
+        <strong>{{ videoWorkCount }}</strong>
+        <small>当前页资产</small>
+      </div>
+      <div class="works-page__metric is-writing">
+        <span>图文 / 脚本</span>
+        <strong>{{ writingWorkCount }}</strong>
+        <small>当前页资产</small>
+      </div>
+    </section>
 
     <div class="u-container">
       <WorkFilterBar
@@ -188,7 +218,7 @@ watch(
         <el-button type="primary" @click="router.push('/creation')">去 AI 创作</el-button>
       </EmptyState>
 
-      <div v-else class="works-page__grid">
+      <TransitionGroup v-else name="card" tag="div" class="works-page__grid">
         <WorkCard
           v-for="work in store.list"
           :key="work.id"
@@ -199,7 +229,7 @@ watch(
           @edit="openEdit"
           @remove="removeWork"
         />
-      </div>
+      </TransitionGroup>
 
       <div
         v-if="!store.loading && !store.failed && store.total > WORK_PAGE_SIZE"
@@ -224,7 +254,19 @@ watch(
 @use '@/styles/mixins' as *;
 
 .works-page {
+  position: relative;
   padding-bottom: var(--sp-16);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 10%;
+    width: min(420px, 38vw);
+    height: 220px;
+    pointer-events: none;
+    background: radial-gradient(closest-side, rgba(192, 80, 60, 0.08), transparent 72%);
+  }
 
   &__header {
     display: flex;
@@ -246,6 +288,23 @@ watch(
     letter-spacing: 1px;
   }
 
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    margin-bottom: var(--sp-3);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.4px;
+
+    span {
+      width: 24px;
+      height: 1px;
+      background: var(--color-primary);
+    }
+  }
+
   &__subtitle {
     margin-top: var(--sp-3);
     max-width: 640px;
@@ -256,6 +315,96 @@ watch(
 
   &__create {
     flex: none;
+  }
+
+  &__dashboard {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(130px, 0.7fr));
+    gap: 1px;
+    margin-bottom: var(--sp-8);
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 18px 42px rgba(35, 34, 32, 0.12);
+
+    @include below($bp-md) {
+      grid-template-columns: 1fr 1fr;
+      margin-inline: var(--sp-4);
+    }
+
+    @include below($bp-sm) {
+      grid-template-columns: 1fr;
+      margin-inline: 0;
+    }
+  }
+
+  &__dashboard-intro,
+  &__metric {
+    min-height: 122px;
+    padding: var(--sp-5);
+    background: #252624;
+    color: var(--text-inverse);
+  }
+
+  &__dashboard-intro {
+    background:
+      radial-gradient(90% 120% at 0% 100%, rgba(192, 80, 60, 0.36), transparent 68%),
+      #252624;
+
+    strong {
+      display: block;
+      margin-top: var(--sp-3);
+      font-family: var(--font-serif);
+      font-size: var(--fs-lg);
+      font-weight: var(--fw-medium);
+    }
+
+    p {
+      margin-top: 4px;
+      color: rgba(253, 251, 247, 0.54);
+      font-size: var(--fs-xs);
+    }
+  }
+
+  &__dashboard-kicker {
+    color: rgba(253, 251, 247, 0.48);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+  }
+
+  &__metric {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: #2c302d;
+
+    &.is-ai {
+      background: #273e3f;
+    }
+
+    &.is-writing {
+      background: #3b302d;
+    }
+
+    span {
+      color: rgba(253, 251, 247, 0.66);
+      font-size: var(--fs-xs);
+    }
+
+    strong {
+      margin-top: var(--sp-3);
+      color: var(--text-inverse);
+      font-family: var(--font-mono);
+      font-size: 30px;
+      font-weight: var(--fw-medium);
+      line-height: 1;
+    }
+
+    small {
+      color: rgba(253, 251, 247, 0.38);
+      font-size: 10px;
+    }
   }
 
   &__meta {
@@ -278,6 +427,7 @@ watch(
   }
 
   &__grid {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--sp-6);

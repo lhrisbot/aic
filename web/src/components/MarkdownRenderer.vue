@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import MarkdownIt from 'markdown-it'
+import type { Source } from '@/types/heritage'
 
 /**
  * AI 结果渲染。
@@ -10,6 +11,7 @@ import MarkdownIt from 'markdown-it'
  */
 const props = defineProps<{
   content: string
+  sources?: Source[]
 }>()
 
 const md = new MarkdownIt({
@@ -18,7 +20,16 @@ const md = new MarkdownIt({
   breaks: true,
 })
 
-const html = computed(() => md.render(props.content || ''))
+const html = computed(() => {
+  const content = props.content || ''
+  const linked = props.sources?.length
+    ? content.replace(/\[(\d+)\](?!\()/g, (match, value: string) => {
+        const source = props.sources?.[Number(value) - 1]
+        return source ? `[${value}](#source-${encodeURIComponent(source.id)})` : match
+      })
+    : content
+  return md.render(linked)
+})
 </script>
 
 <template>

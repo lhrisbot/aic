@@ -1,24 +1,29 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import HeritageCover from '@/components/HeritageCover.vue'
 import type { Heritage } from '@/types/heritage'
 
 /** 非遗卡片：封面、名称、地区、类别、一句简介、标签 */
-defineProps<{
+const props = defineProps<{
   heritage: Heritage
 }>()
+const imageFailed = ref(false)
+watch(() => props.heritage.cover, () => { imageFailed.value = false })
 </script>
 
 <template>
   <RouterLink :to="`/heritage/${heritage.id}`" class="heritage-card">
     <div class="heritage-card__cover">
-      <img
-        v-if="heritage.cover"
-        :src="heritage.cover"
-        :alt="heritage.name"
-        loading="lazy"
-        class="heritage-card__image"
-      />
+      <div v-if="heritage.cover && !imageFailed" class="heritage-card__visual">
+        <img
+          :src="heritage.cover"
+          :alt="`${heritage.name} AI 主题示意图，非档案照片`"
+          loading="lazy"
+          class="heritage-card__image"
+          @error="imageFailed = true"
+        />
+      </div>
       <HeritageCover
         v-else
         :name="heritage.name"
@@ -65,8 +70,8 @@ defineProps<{
     border-color: var(--border-color-strong);
     box-shadow: var(--shadow-lg);
 
-    .heritage-card__cover > :not(.heritage-card__level) {
-      transform: scale(1.04);
+    .heritage-card__visual {
+      transform: scale(1.045);
     }
 
     .heritage-card__name {
@@ -79,15 +84,27 @@ defineProps<{
     height: 152px;
     overflow: hidden;
 
-    > :not(.heritage-card__level) {
-      transition: transform var(--duration-slow) var(--ease-out);
-    }
+  }
+
+  &__visual {
+    width: 100%;
+    height: 100%;
+    transition: transform 500ms var(--ease-out);
+  }
+
+  &__visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(23, 30, 29, 0.03), transparent 45%, rgba(23, 30, 29, 0.16));
+    pointer-events: none;
   }
 
   &__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    animation: heritage-drift 15s ease-in-out infinite alternate;
   }
 
   &__level {
@@ -162,5 +179,14 @@ defineProps<{
       font-size: var(--fs-xs);
     }
   }
+}
+
+@keyframes heritage-drift {
+  from { transform: scale(1.02) translate3d(-0.5%, 0, 0); }
+  to { transform: scale(1.1) translate3d(0.5%, -1%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heritage-card__image { animation: none; }
 }
 </style>

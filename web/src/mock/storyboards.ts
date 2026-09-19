@@ -21,7 +21,7 @@ const CATEGORY_HINTS: Record<
     closeup: '手部与面部的特写，妆面与头饰的细节逐渐清晰',
     action: '表演者的身段展开，一个转身带出整片光影',
     craft: '后台准备的过程：勒头、上妆、检场',
-    prompt: 'traditional Chinese opera performance, dramatic stage lighting, red and gold tones, cinematic',
+    prompt: 'traditional Chinese stage performance, theatrical lighting, restrained warm palette, documentary cinematic',
   },
   传统美术: {
     closeup: '手指与工具的极近特写，材料在指尖逐渐成形',
@@ -55,13 +55,35 @@ const CATEGORY_HINTS: Record<
   },
 }
 
+/** 比赛常用演示项目补充专属镜头，避免皮影戏被套用通用戏曲妆面文案。 */
+const PROJECT_HINTS: Record<string, (typeof CATEGORY_HINTS)[HeritageCategory]> = {
+  皮影戏: {
+    closeup: '刻刀沿着牛皮上的纹样游走，镂空的影人部件被逐一拼接',
+    action: '艺人握着操纵杆，让影人在透光幕布上转身、举袖与相遇',
+    craft: '影人雕刻、着色、装杆与幕后操纵的连续工序',
+    prompt: 'Chinese shadow puppetry, translucent carved leather puppets behind a lit screen, puppeteer hands, warm amber light, documentary cinematic',
+  },
+  昆曲: {
+    closeup: '水袖与折扇的细节特写，演员的眼神和指尖随曲调轻移',
+    action: '演员在简净舞台上转身、收袖，身段与唱腔彼此呼应',
+    craft: '后台对镜整理戏服与妆容，乐师调弦准备入场',
+    prompt: 'Kunqu opera performer, flowing water sleeves and folding fan, elegant Chinese theater stage, refined soft light, documentary cinematic',
+  },
+  川剧变脸: {
+    closeup: '脸谱纹样与戏服刺绣交替闪现，镜头停在演员抬手的瞬间',
+    action: '演员转身甩袖，脸谱在动作交错之间迅速变化',
+    craft: '后台整理戏服与脸谱道具，演员对镜练习身段',
+    prompt: 'Sichuan opera face changing performance, ornate embroidered costume and painted mask, dramatic stage spotlight, documentary cinematic',
+  },
+}
+
 /**
  * 生成分镜脚本。
  * 镜头数量与时间轴随视频时长变化（15 秒 3 镜 / 30 秒 5 镜 / 60 秒 6 镜），
  * 每个镜头包含画面描述、旁白与 AI Video Prompt。
  */
 export function buildStoryboards(seed: StoryboardSeed, duration: number): Storyboard[] {
-  const hints = CATEGORY_HINTS[seed.category] ?? CATEGORY_HINTS['传统技艺']
+  const hints = PROJECT_HINTS[seed.name] ?? CATEGORY_HINTS[seed.category] ?? CATEGORY_HINTS['传统技艺']
   const total = duration > 0 ? duration : 30
   const shotCount = total <= 15 ? 3 : total <= 30 ? 5 : 6
   const step = total / shotCount

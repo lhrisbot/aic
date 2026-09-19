@@ -18,43 +18,43 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'Home',
         component: () => import('@/views/Home/index.vue'),
-        meta: { title: '首页', activeMenu: 'home' },
+        meta: { title: '首页', activeMenu: 'home', layout: 'public', transition: 'page' },
       },
       {
         path: 'heritage',
         name: 'HeritageList',
         component: () => import('@/views/Heritage/index.vue'),
-        meta: { title: '非遗探索', activeMenu: 'heritage' },
+        meta: { title: '非遗探索', activeMenu: 'heritage', layout: 'discovery', transition: 'discovery' },
       },
       {
         path: 'heritage/:id',
         name: 'HeritageDetail',
         component: () => import('@/views/Heritage/Detail.vue'),
-        meta: { title: '非遗详情', activeMenu: 'heritage' },
+        meta: { title: '非遗详情', activeMenu: 'heritage', layout: 'editorial', transition: 'editorial' },
       },
       {
         path: 'creation',
         name: 'Creation',
         component: () => import('@/views/Creation/index.vue'),
-        meta: { title: 'AI 创作', activeMenu: 'creation', requiresAuth: true },
+        meta: { title: 'AI 创作', activeMenu: 'creation', requiresAuth: true, layout: 'studio', transition: 'studio' },
       },
       {
         path: 'video',
         name: 'Video',
         component: () => import('@/views/Video/index.vue'),
-        meta: { title: '视频创作', activeMenu: 'video', requiresAuth: true },
+        meta: { title: '视频创作', activeMenu: 'video', requiresAuth: true, layout: 'production', transition: 'production' },
       },
       {
         path: 'works',
         name: 'Works',
         component: () => import('@/views/Works/index.vue'),
-        meta: { title: '我的作品', activeMenu: 'works', requiresAuth: true },
+        meta: { title: '我的作品', activeMenu: 'works', requiresAuth: true, layout: 'library', transition: 'library' },
       },
       {
         path: 'works/:id',
         name: 'WorkDetail',
         component: () => import('@/views/Works/Detail.vue'),
-        meta: { title: '作品详情', activeMenu: 'works', requiresAuth: true },
+        meta: { title: '作品详情', activeMenu: 'works', requiresAuth: true, layout: 'editorial', transition: 'editorial' },
       },
     ],
   },
@@ -66,13 +66,13 @@ const routes: RouteRecordRaw[] = [
         path: 'login',
         name: 'Login',
         component: () => import('@/views/Login/index.vue'),
-        meta: { title: '登录' },
+        meta: { title: '登录', layout: 'auth' },
       },
       {
         path: 'register',
         name: 'Register',
         component: () => import('@/views/Register/index.vue'),
-        meta: { title: '注册' },
+        meta: { title: '注册', layout: 'auth' },
       },
     ],
   },
@@ -98,7 +98,11 @@ const router = createRouter({
     if (savedPosition) {
       return savedPosition
     }
-    return { top: 0 }
+    // 同一页面内的筛选、分页不强制打断用户当前阅读位置；跨页面时平滑回到顶部。
+    if (_to.path === _from.path) {
+      return false
+    }
+    return { top: 0, behavior: 'smooth' }
   },
 })
 

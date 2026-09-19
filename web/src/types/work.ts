@@ -33,6 +33,8 @@ export interface Work {
   style?: string
   /** 视频型：关联的视频任务 */
   videoTaskId?: string
+  /** 视频型：最终可播放的视频地址 */
+  videoUrl?: string
   /** 视频型：分镜脚本 */
   storyboards?: Storyboard[]
   createdAt: string

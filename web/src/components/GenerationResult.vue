@@ -128,7 +128,7 @@ const storyboards = computed(() => props.result.videoScript?.shots ?? [])
       </div>
     </section>
 
-    <MarkdownRenderer v-else class="generation-result__body" :content="result.content" />
+    <MarkdownRenderer v-else class="generation-result__body" :content="result.content" :sources="result.sources" />
 
     <!-- 短视频场景：生成视频脚本 / 进入视频创作 -->
     <section v-if="result.scene === 'video'" class="generation-result__video">

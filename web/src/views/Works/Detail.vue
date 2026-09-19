@@ -190,7 +190,12 @@ watch(id, () => void load(), { immediate: true })
         <template v-if="isVideo">
           <section class="work-detail__section">
             <h2 class="work-detail__section-title">视频预览</h2>
-            <VideoPlayerPlaceholder :title="work.title" :duration="work.duration ?? 0" />
+            <VideoPlayerPlaceholder
+              :title="work.title"
+              :duration="work.duration ?? 0"
+              :video-url="work.videoUrl"
+              :cover="work.cover"
+            />
           </section>
 
           <section id="script" class="work-detail__section">

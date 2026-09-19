@@ -3,7 +3,7 @@ import { Film, Reading, VideoPlay } from '@element-plus/icons-vue'
 import PatternBackdrop from '@/components/PatternBackdrop.vue'
 
 /**
- * Hero 右侧的 AI × 非遗 视觉区（纯 CSS/SVG，不依赖外网图片）。
+ * Hero 右侧的 AI × 非遗 视觉区，使用本地生成的非遗主题示意配图。
  * 用三层卡片同时交代平台的三件事：可信知识检索 → 场景化文案生成 → 分镜与视频生成。
  */
 const KNOWLEDGE_ROWS = [
@@ -17,11 +17,12 @@ const SHOT_ROWS = [
   { index: '02', time: '5-15 秒', text: '手部特写，雕刻刀锋游走' },
   { index: '03', time: '15-30 秒', text: '年轻艺人向观众演示操影' },
 ]
+const heroPhoto = `url('${import.meta.env.BASE_URL}heritage/shadow-puppetry.jpg')`
 </script>
 
 <template>
   <div class="hero-visual" aria-hidden="true">
-    <div class="hero-visual__stage">
+    <div class="hero-visual__stage" :style="{ '--hero-photo': heroPhoto }">
       <PatternBackdrop class="hero-visual__texture" variant="crackle" />
       <span class="hero-visual__glow is-primary" />
       <span class="hero-visual__glow is-ai" />
@@ -31,7 +32,7 @@ const SHOT_ROWS = [
         <header class="hero-visual__head">
           <span class="hero-visual__tag is-ai">
             <el-icon :size="13"><Reading /></el-icon>
-            基于知识库生成
+            知识库生成示意
           </span>
           <span class="hero-visual__dot-group">
             <i /><i /><i />
@@ -48,7 +49,7 @@ const SHOT_ROWS = [
         </div>
 
         <footer class="hero-visual__foot">
-          <span class="hero-visual__foot-text">已引用 3 条非遗资料</span>
+          <span class="hero-visual__foot-text">示例引用 3 条资料</span>
           <span class="hero-visual__chips">
             <i>名录</i><i>展陈</i><i>地方志</i>
           </span>
@@ -59,7 +60,7 @@ const SHOT_ROWS = [
       <article class="hero-visual__float is-knowledge">
         <p class="hero-visual__float-title">
           <el-icon :size="13"><Reading /></el-icon>
-          非遗知识库检索
+          知识库检索示意
         </p>
         <ul class="hero-visual__sources">
           <li v-for="row in KNOWLEDGE_ROWS" :key="row.title">
@@ -87,7 +88,7 @@ const SHOT_ROWS = [
         </ul>
         <p class="hero-visual__video">
           <el-icon :size="14"><VideoPlay /></el-icon>
-          正在合成宣传视频
+          视频合成流程示意
           <span class="hero-visual__progress"><i /></span>
         </p>
       </article>
@@ -104,15 +105,15 @@ const SHOT_ROWS = [
 
   &__stage {
     position: relative;
-    min-height: 460px;
+    min-height: 520px;
     padding: var(--sp-8);
     border-radius: var(--radius-xl);
     background:
-      radial-gradient(90% 70% at 82% 12%, var(--color-ai-soft), transparent 60%),
-      radial-gradient(80% 60% at 8% 92%, var(--color-primary-soft), transparent 62%),
-      var(--bg-card);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
+      linear-gradient(140deg, rgba(22, 29, 28, 0.76) 0%, rgba(22, 29, 28, 0.18) 52%, rgba(22, 29, 28, 0.64) 100%),
+      var(--hero-photo) center / cover no-repeat,
+      #252624;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 70px rgba(35, 34, 32, 0.2);
 
     @include below($bp-md) {
       min-height: auto;

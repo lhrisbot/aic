@@ -23,6 +23,8 @@ export function generateVideoScript(payload: {
   heritageId: string
   duration: number
   style?: string
+  /** 用户确认后的文案或主题稿，脚本应以此为内容依据 */
+  content?: string
 }): Promise<VideoScript> {
   if (USE_MOCK) {
     return mockGenerateVideoScript(payload)

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ElMessage } from 'element-plus'
 import { Collection, Download, Refresh, VideoPlay, Warning } from '@element-plus/icons-vue'
 import { VIDEO_STATUS_META } from '@/config/constants'
+import { USE_MOCK } from '@/utils/request'
 import { useVideoStore } from '@/stores/video'
 import VideoPlayerPlaceholder from '@/components/VideoPlayerPlaceholder.vue'
 
@@ -11,8 +11,13 @@ import VideoPlayerPlaceholder from '@/components/VideoPlayerPlaceholder.vue'
  * 成功后展示播放占位区与保存、重新生成、下载三项操作。
  */
 const store = useVideoStore()
+const showDemoControls = import.meta.env.VITE_SHOW_DEMO_CONTROLS === 'true'
 
 const statusMeta = computed(() => VIDEO_STATUS_META[store.status as keyof typeof VIDEO_STATUS_META])
+const downloadableUrl = computed(() => {
+  const url = store.task?.videoUrl ?? ''
+  return /^https?:\/\//.test(url) ? url : ''
+})
 
 function handleGenerate(): void {
   void store.createTask()
@@ -26,9 +31,13 @@ function handleSave(): void {
   void store.saveTaskAsWork()
 }
 
-/** 演示版本没有真实视频文件：明确告知，而不是给一个点了没反应的按钮 */
 function handleDownload(): void {
-  ElMessage.warning('演示版本使用占位视频，接入真实视频生成服务后即可下载')
+  if (!downloadableUrl.value) return
+  const link = document.createElement('a')
+  link.href = downloadableUrl.value
+  link.download = `${store.task?.title ?? '非遗宣传视频'}.mp4`
+  link.rel = 'noopener noreferrer'
+  link.click()
 }
 </script>
 
@@ -44,13 +53,19 @@ function handleDownload(): void {
 
       <div v-if="store.task" class="video-task__status">
         <el-tag :type="statusMeta?.tagType ?? 'info'" effect="light" round>
-          {{ statusMeta?.label }}
+          {{ USE_MOCK && store.isSuccess ? '流程演示完成' : statusMeta?.label }}
         </el-tag>
-        <span class="video-task__status-desc">{{ statusMeta?.description }}</span>
+        <span class="video-task__status-desc">
+          {{ USE_MOCK && store.isSuccess ? '任务状态已模拟完成；当前没有真实视频文件' : statusMeta?.description }}
+        </span>
       </div>
 
-      <!-- 演示开关常驻：无论是否已有任务，都能切换下一次生成的预期结果 -->
-      <el-checkbox v-model="store.simulateFailure" class="video-task__simulate">
+      <!-- 仅通过显式环境变量打开，避免比赛演示界面出现 Mock 控件 -->
+      <el-checkbox
+        v-if="showDemoControls"
+        v-model="store.simulateFailure"
+        class="video-task__simulate"
+      >
         模拟生成失败（演示用）
       </el-checkbox>
     </header>
@@ -76,8 +91,10 @@ function handleDownload(): void {
           还没有分镜，先在上方生成或添加分镜。
         </template>
         <template v-else>
-          默认按成功生成；勾选右上角开关后点击生成或「重新生成」，可演示「生成失败」形态
-          （不做随机失败，保证演示可控）。
+          当前分镜确认后即可提交视频生成任务；生成过程中可以查看任务进度。
+          <template v-if="showDemoControls">
+            勾选右上角开关后可以演示「生成失败」形态。
+          </template>
         </template>
       </p>
     </div>
@@ -89,14 +106,12 @@ function handleDownload(): void {
         <p class="video-task__state-title">等待生成</p>
         <p class="video-task__state-desc">任务已提交，正在排队等待算力资源…</p>
       </div>
-      <el-button text @click="store.resetTask">取消任务</el-button>
     </div>
 
     <!-- 3. 生成中 -->
     <div v-else-if="store.isGenerating" class="video-task__generating">
       <div class="video-task__state-head">
         <p class="video-task__state-title">正在生成（{{ store.progress }}%）</p>
-        <el-button text @click="store.resetTask">取消任务</el-button>
       </div>
 
       <el-progress :percentage="store.progress" :stroke-width="10" :show-text="false" />
@@ -113,6 +128,8 @@ function handleDownload(): void {
       <VideoPlayerPlaceholder
         :title="store.task.title"
         :duration="store.task.duration"
+        :video-url="store.task.videoUrl"
+        :cover="store.task.cover"
       />
 
       <div class="video-task__result-actions">
@@ -122,10 +139,10 @@ function handleDownload(): void {
           :loading="store.saving"
           @click="handleSave"
         >
-          保存作品
+          {{ USE_MOCK ? '保存分镜方案' : '保存作品' }}
         </el-button>
         <el-button :icon="Refresh" @click="handleRegenerate">重新生成</el-button>
-        <el-button :icon="Download" @click="handleDownload">下载视频</el-button>
+        <el-button v-if="downloadableUrl" :icon="Download" @click="handleDownload">下载视频</el-button>
       </div>
 
       <p v-if="store.savedWorkId" class="video-task__saved">

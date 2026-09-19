@@ -41,10 +41,12 @@ watch(
 onBeforeUnmount(stopTipTimer)
 
 function goVideo(): void {
+  const draftId = store.createVideoDraft()
   void router.push({
     path: '/video',
     query: {
       heritageId: store.form.heritageId,
+      ...(draftId ? { draftId } : {}),
       ...(store.savedWorkId ? { workId: store.savedWorkId } : {}),
     },
   })
@@ -53,6 +55,12 @@ function goVideo(): void {
 
 <template>
   <section class="generation-panel">
+    <header class="generation-panel__chrome">
+      <span><i aria-hidden="true" /> CONTENT CANVAS</span>
+      <em v-if="store.generating">正在生成</em>
+      <em v-else-if="store.result">{{ store.sceneLabel }} · 可编辑</em>
+      <em v-else>等待创作</em>
+    </header>
     <!-- 1. 未选择项目 -->
     <div v-if="!store.form.heritageId && !store.generating" class="generation-panel__state">
       <EmptyState
@@ -133,7 +141,7 @@ function goVideo(): void {
 
 .generation-panel {
   min-height: 560px;
-  padding: var(--sp-8);
+  padding: 0 var(--sp-8) var(--sp-8);
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -141,7 +149,25 @@ function goVideo(): void {
 
   @include below($bp-md) {
     min-height: auto;
-    padding: var(--sp-5);
+    padding: 0 var(--sp-5) var(--sp-5);
+  }
+
+  &__chrome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    min-height: 56px;
+    margin-bottom: var(--sp-5);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-tertiary);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+
+    span { display: inline-flex; align-items: center; gap: 8px; }
+    i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-ai); }
+    em { font-family: var(--font-sans); font-size: var(--fs-xs); font-style: normal; letter-spacing: 0; }
   }
 
   &__state {

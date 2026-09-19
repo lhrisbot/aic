@@ -11,6 +11,13 @@ const FACTS: Array<{ value: string; label: string }> = [
   { value: '4 类', label: '创作场景' },
   { value: '4 步', label: '视频生成流程' },
 ]
+
+const WORKFLOW: Array<{ index: string; title: string; detail: string }> = [
+  { index: '01', title: '检索知识', detail: '可信来源' },
+  { index: '02', title: '生成内容', detail: '场景适配' },
+  { index: '03', title: '拆解分镜', detail: '逐镜可改' },
+  { index: '04', title: '生成视频', detail: '任务可追踪' },
+]
 </script>
 
 <template>
@@ -25,18 +32,18 @@ const FACTS: Array<{ value: string; label: string }> = [
         </p>
 
         <h1 class="hero__title">
-          让<span class="hero__highlight">千年非遗</span>，<br />被今天的人看见
+          从<span class="hero__highlight">非遗资料</span>，<br />到可发布的文化内容
         </h1>
 
-        <p class="hero__subtitle">基于可信非遗知识库的 AI 多模态文化内容创作平台</p>
+        <p class="hero__subtitle">给文旅与文化传播人员的一站式 AI 创作工作台</p>
 
         <p class="hero__desc">
-          帮助文旅工作者快速完成非遗资料查询、场景化内容创作、视频脚本与宣传视频生成。
+          选一个非遗项目，参考资料会跟着创作结果一起出现。编辑推文或短视频文案，再拆成分镜并提交视频生成任务。
         </p>
 
         <div class="hero__actions">
-          <el-button type="primary" size="large" @click="router.push('/creation')">
-            开始创作
+          <el-button type="primary" size="large" @click="router.push('/creation?heritageId=shadow-puppetry&scene=video')">
+            用皮影戏体验创作
           </el-button>
           <el-button size="large" @click="router.push('/heritage')">探索非遗</el-button>
         </div>
@@ -47,6 +54,23 @@ const FACTS: Array<{ value: string; label: string }> = [
             <dd class="hero__fact-label">{{ fact.label }}</dd>
           </div>
         </dl>
+
+        <div class="hero__workflow" aria-label="从非遗资料到视频的创作流程">
+          <div class="hero__workflow-head">
+            <span>ONE WORKFLOW</span>
+            <em>从资料到成片</em>
+          </div>
+          <div class="hero__workflow-track">
+            <template v-for="(stage, index) in WORKFLOW" :key="stage.index">
+              <div class="hero__workflow-step">
+                <span class="hero__workflow-index">{{ stage.index }}</span>
+                <strong>{{ stage.title }}</strong>
+                <small>{{ stage.detail }}</small>
+              </div>
+              <i v-if="index < WORKFLOW.length - 1" class="hero__workflow-arrow">→</i>
+            </template>
+          </div>
+        </div>
       </div>
 
       <div class="hero__visual">
@@ -188,6 +212,98 @@ const FACTS: Array<{ value: string; label: string }> = [
   &__visual {
     @include below($bp-xl) {
       max-width: 640px;
+    }
+  }
+
+  &__workflow {
+    margin-top: var(--sp-8);
+    padding: var(--sp-4) var(--sp-5);
+    border-radius: var(--radius-lg);
+    background: #242522;
+    color: var(--text-inverse);
+    box-shadow: 0 18px 44px rgba(35, 34, 32, 0.12);
+  }
+
+  &__workflow-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--sp-4);
+    color: rgba(253, 251, 247, 0.64);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+
+    em {
+      color: rgba(253, 251, 247, 0.44);
+      font-family: var(--font-sans);
+      font-style: normal;
+      letter-spacing: 0;
+    }
+  }
+
+  &__workflow-track {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+
+  &__workflow-step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 8px;
+    min-width: 0;
+    flex: 1;
+
+    strong {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-family: var(--font-serif);
+      font-size: 13px;
+      font-weight: var(--fw-medium);
+    }
+
+    small {
+      grid-column: 2;
+      margin-top: 2px;
+      color: rgba(253, 251, 247, 0.46);
+      font-size: 10px;
+    }
+  }
+
+  &__workflow-index {
+    grid-row: span 2;
+    color: #e2a080;
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+
+  &__workflow-arrow {
+    flex: none;
+    color: rgba(253, 251, 247, 0.34);
+    font-style: normal;
+  }
+
+  @include below($bp-md) {
+    &__workflow-track {
+      align-items: stretch;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    &__workflow-step {
+      padding-bottom: var(--sp-3);
+      border-bottom: 1px solid rgba(253, 251, 247, 0.1);
+    }
+
+    &__workflow-step:last-of-type {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    &__workflow-arrow {
+      display: none;
     }
   }
 }

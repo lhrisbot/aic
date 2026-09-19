@@ -23,7 +23,8 @@ export interface Storyboard {
 }
 
 /** 视频任务 */
-export interface VideoTask {  id: string
+export interface VideoTask {
+  id: string
   /** 例：皮影戏 · 国潮非遗宣传短片 */
   title: string
   heritageId: string

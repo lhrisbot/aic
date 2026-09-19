@@ -81,11 +81,12 @@ function redirectToLogin(): void {
   removeStorage(USER_KEY)
   const { pathname, search, hash } = window.location
   const current = `${pathname}${search}${hash}`
-  if (current.startsWith('/login')) {
+  const loginPath = `${import.meta.env.BASE_URL}login`
+  if (pathname === loginPath) {
     return
   }
   const redirect = encodeURIComponent(current)
-  window.location.replace(`/login?redirect=${redirect}`)
+  window.location.replace(`${loginPath}?redirect=${redirect}`)
 }
 
 /** 把 Axios 错误转换为对用户友好的提示文案 */

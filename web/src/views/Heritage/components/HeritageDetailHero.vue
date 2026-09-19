@@ -1,21 +1,26 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import HeritageCover from '@/components/HeritageCover.vue'
 import type { Heritage } from '@/types/heritage'
 
 /** 非遗详情页头图：大幅封面 + 叠加信息卡（名称、地区、类别、保护级别、标签、简介） */
-defineProps<{
+const props = defineProps<{
   heritage: Heritage
 }>()
+const imageFailed = ref(false)
+watch(() => props.heritage.cover, () => { imageFailed.value = false })
 </script>
 
 <template>
   <header class="detail-hero">
     <div class="detail-hero__band">
       <img
-        v-if="heritage.cover"
+        v-if="heritage.cover && !imageFailed"
         :src="heritage.cover"
-        :alt="heritage.name"
+        :alt="`${heritage.name} AI 主题示意图，非档案照片`"
         class="detail-hero__image"
+        @error="imageFailed = true"
       />
       <HeritageCover
         v-else
@@ -40,6 +45,13 @@ defineProps<{
         </div>
 
         <p class="detail-hero__summary">{{ heritage.summary }}</p>
+
+        <RouterLink
+          class="detail-hero__cta"
+          :to="{ path: '/creation', query: { heritageId: heritage.id } }"
+        >
+          用{{ heritage.name }}开始 AI 创作 <span aria-hidden="true">→</span>
+        </RouterLink>
 
         <ul class="detail-hero__tags">
           <li v-for="tag in heritage.tags" :key="tag"># {{ tag }}</li>
@@ -152,6 +164,24 @@ defineProps<{
     font-size: var(--fs-md);
     line-height: var(--lh-relaxed);
     color: var(--text-secondary);
+  }
+
+  &__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-top: var(--sp-5);
+    padding: 10px 18px;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--text-inverse);
+    font-size: var(--fs-sm);
+    transition: transform var(--duration) var(--ease-out), box-shadow var(--duration) var(--ease-out);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
   }
 
   &__tags {

@@ -26,20 +26,15 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 5173,
     open: false,
-    // 忽略工具产生的临时目录、验证产物与静态图片目录，
-    // 避免监听器在文件正被写入时触发 EBUSY 崩溃（public/ 仍会被正常访问）
+    // 忽略工具产生的临时目录、验证产物。非遗配图保留监听，
+    // 开发时新增 public 图片后 Vite 才能立即识别并提供访问。
     watch: {
       ignored: [
         '**/.verify/**',
         '**/.verify',
-        '**/public/covers/**',
         '**/*.tmpdir/**',
         '**/.*.tmpdir/**',
         '**/*.tmp',
-        '**/*.jpg',
-        '**/*.jpeg',
-        '**/*.png',
-        '**/*.webp',
       ],
     },
     // 预留 FastAPI 后端代理：VITE_USE_MOCK=false 时 /api 转发到本地后端
